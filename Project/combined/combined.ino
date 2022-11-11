@@ -35,7 +35,7 @@ void setup() {
 
   pinMode(rainPin, INPUT);
 
-  Serial.println(" Serial Begins");
+  //Serial.println(" Serial Begins");
   // Start the DS18B20 sensor
   sensors.begin();
 
@@ -102,16 +102,17 @@ void precipitation_readings() {
   // read the input on analog pin 0:
   int sensorValue = analogRead(rainPin);
   Serial.print(sensorValue);
-  if (sensorValue < dryValue) {
+  if (sensorValue == dryValue){
+    Serial.println(" - Dry");
+  }
+    else if (lightValue <= sensorValue < dryValue) {
     Serial.println(" - Drizzling");
-  } else if (sensorValue < lightValue) {
+  } else if (heavyValue <= sensorValue < lightValue) {
     Serial.println(" - Light Rain");
   } else if (sensorValue < heavyValue) {
     Serial.println(" - Heavy Rain");
-  } else {
-    Serial.println(" - No Rain");
   }
-  delay(10000);
+  delay(250);
 }
 void temp_readings() {
   sensors.requestTemperatures();
@@ -119,10 +120,10 @@ void temp_readings() {
   float temperatureC = sensors.getTempCByIndex(0);
   //float temperatureF = sensors.getTempFByIndex(0);
   Serial.print(Temperature);
-  Serial.println("ºC");
+  Serial.println(" C");
   // Serial.print(temperatureF);
   // Serial.println("ºF");
-  delay(5000);
+  delay(250);
   // Serial.println("Go to sleep");
   // esp_deep_sleep(30e6);
 }
