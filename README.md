@@ -2,7 +2,7 @@
 
 To do list
 
--build circuit
--write uss code
--write temp sensor code
--write precipitation sensor code
+- [x] kamiquasi
+- [ ] Update to do list
+- [ ] sell product
+- [ ] make millions
