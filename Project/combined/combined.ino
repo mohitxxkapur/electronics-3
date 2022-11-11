@@ -1,8 +1,21 @@
+#include <HCSR04.h>
+
+#include <Arduino.h>
+#include <heltec.h>
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+OneWire ds(25);
+DallasTemperature sensors(&ds);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 int rainPin = 36;
-// you can adjust the threshold value
 int dryValue = 4095;
 int lightValue = 3250;
 int heavyValue = 1000;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define trigPin_USS 4
@@ -22,6 +35,10 @@ void setup() {
 
   pinMode(rainPin, INPUT);
 
+  Serial.println(" Serial Begins");
+  // Start the DS18B20 sensor
+  sensors.begin();
+
   //uss_setup();
   //precipitation_setup();
 }
@@ -30,6 +47,7 @@ void loop() {
 
   uss_readings();
   precipitation_readings();
+  temp_readings();
 }
 
 //SETUPS////////////////////////////////
@@ -93,10 +111,20 @@ void precipitation_readings() {
   } else {
     Serial.println(" - No Rain");
   }
-  delay(2000);
+  delay(10000);
 }
 void temp_readings() {
-  //put your temp readings here
+  sensors.requestTemperatures();
+  float Temperature = (float)(sensors.getTempCByIndex(0));
+  float temperatureC = sensors.getTempCByIndex(0);
+  //float temperatureF = sensors.getTempFByIndex(0);
+  Serial.print(Temperature);
+  Serial.println("ºC");
+  // Serial.print(temperatureF);
+  // Serial.println("ºF");
+  delay(5000);
+  // Serial.println("Go to sleep");
+  // esp_deep_sleep(30e6);
 }
 
 //extra methods//////////////////////////////////////////////////////////////////////////////////////////
