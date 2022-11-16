@@ -3,11 +3,9 @@
 #include <Arduino.h>
 #include <heltec.h>
 
-#include <OneWire.h>
-#include <DallasTemperature.h>
+#include <DHT.h>
 
-OneWire ds(25);
-DallasTemperature sensors(&ds);
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,12 +16,16 @@ int heavyValue = 1000;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define DHT11PIN 16
 #define trigPin_USS 4
 #define echoPin_USS 18
 #define WAIT_FOR_VEHICLE 0
 #define WAIT_FOR_NO_VEHICLE 1
 
 int counter_uss = 0;  //Initialize the counter_uss
+DHT dht(DHT11PIN, DHT11);
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -37,7 +39,7 @@ void setup() {
 
   //Serial.println(" Serial Begins");
   // Start the DS18B20 sensor
-  sensors.begin();
+  dht.begin();
 
   //uss_setup();
   //precipitation_setup();
@@ -120,17 +122,15 @@ void precipitation_readings() {
   delay(20);
 }
 void temp_readings() {
-  sensors.requestTemperatures();
-  float Temperature = (float)(sensors.getTempCByIndex(0));
-  float temperatureC = sensors.getTempCByIndex(0);
-  //float temperatureF = sensors.getTempFByIndex(0);
-  Serial.print(Temperature);
-  Serial.println(" C");
-  // Serial.print(temperatureF);
-  // Serial.println("ºF");
+  float humi = dht.readHumidity();
+  float temp = dht.readTemperature();
+  Serial.print("Temperature: ");
+  Serial.print(temp);
+  Serial.print(" C ");
+  Serial.println("Humidity: ");
+  Serial.print(humi);
+  Serial.print("%");
   delay(20);
-  // Serial.println("Go to sleep");
-  // esp_deep_sleep(30e6);
 }
 
 //extra methods//////////////////////////////////////////////////////////////////////////////////////////
