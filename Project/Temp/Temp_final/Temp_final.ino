@@ -1,6 +1,5 @@
 #include "DHT.h"
 #define DHT11PIN 16
-//marco smells like donkeys
 
 DHT dht(DHT11PIN, DHT11);
 void setup()
