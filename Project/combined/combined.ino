@@ -46,8 +46,14 @@ void setup() {
 void loop() {
 
   uss_readings();
-  precipitation_readings();
-  temp_readings();
+  //if counter is whatever, then call these methods.
+  //Serial.print("counter value is at: ");
+  //Serial.println(counter_uss);
+  if (counter_uss % 10 == 0){
+    precipitation_readings();
+    temp_readings();
+  }
+
 }
 
 //SETUPS////////////////////////////////
@@ -102,17 +108,16 @@ void precipitation_readings() {
   // read the input on analog pin 0:
   int sensorValue = analogRead(rainPin);
   Serial.print(sensorValue);
-  if (sensorValue == dryValue){
+  if (sensorValue == dryValue) {
     Serial.println(" - Dry");
-  }
-    else if (lightValue <= sensorValue < dryValue) {
+  } else if (lightValue <= sensorValue < dryValue) {
     Serial.println(" - Drizzling");
   } else if (heavyValue <= sensorValue < lightValue) {
     Serial.println(" - Light Rain");
   } else if (sensorValue < heavyValue) {
     Serial.println(" - Heavy Rain");
   }
-  delay(250);
+  delay(20);
 }
 void temp_readings() {
   sensors.requestTemperatures();
@@ -123,7 +128,7 @@ void temp_readings() {
   Serial.println(" C");
   // Serial.print(temperatureF);
   // Serial.println("ºF");
-  delay(250);
+  delay(20);
   // Serial.println("Go to sleep");
   // esp_deep_sleep(30e6);
 }
