@@ -1,6 +1,6 @@
 #include "DHT.h"
 #define DHT11PIN 16
-//penis
+
 
 DHT dht(DHT11PIN, DHT11);
 void setup()
