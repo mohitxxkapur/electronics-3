@@ -168,35 +168,35 @@ void setup() {
 
   // Update database path
   databasePath = "/UsersData/" + uid + "/readings";
+  parentPath = databasePath; //+ "/" + String(timestamp);
 }
 
 void loop() {
 
+  //timestamp = getTime();
+  //parentPath = databasePath //+ "/" + String(timestamp);
+
   uss_readings();
-  update_firebase();
-  Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
-
-}
-/////////////////////////////
-
-void update_firebase() {
-
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
     sendDataPrevMillis = millis();
 
     //Get current timestamp
-    timestamp = getTime();
-    Serial.print("time: ");
-    Serial.println(timestamp);
+    // timestamp = getTime();
+    // Serial.print("time: ");
+    // Serial.println(timestamp);
 
-    parentPath = databasePath + "/" + String(timestamp);
+    //parentPath = databasePath + "/" + String(timestamp);
 
     temp_readings();
     precipitation_readings();
 
-    json.set(timePath, String(timestamp));
     //Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
   }
+  Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
+}
+/////////////////////////////
+
+void update_firebase() {
 }
 
 // sensor readings ////////////////////////////////////////////////////
