@@ -211,7 +211,7 @@ void uss_readings() {
         counter_uss++;
         // Serial.print(F("Count is: "));
         // Serial.println(counter_uss);
-        json.set(precipPath.c_str(), "Cars passed: "+String(counter_uss));
+        json.set(countPath.c_str(), "Cars passed: "+String(counter_uss));
         state = WAIT_FOR_NO_VEHICLE;
 
       }  //if
