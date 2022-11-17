@@ -1,8 +1,18 @@
 #include <HCSR04.h>
+
 #include <Arduino.h>
 #include <heltec.h>
-#include <DHT.h>
-#include <Adafruit_Sensor.h>
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#include <WiFi.h>
+#include <Firebase_ESP_Client.h>
+#include <Wire.h>
+#include "time.h"
+
+#include "DHT.h"
+#define DHT11PIN 16
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -22,7 +32,93 @@ int heavyValue = 1000;
 int counter_uss = 0;  //Initialize the counter_uss
 DHT dht(DHT11PIN, DHT11);
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//firebase connection setup
+// helper functions
+#include "addons/TokenHelper.h"
+#include "addons/RTDBHelper.h"
+
+// Various credentials
+#define WIFI_SSID "Sauga Strawhats"
+#define WIFI_PASSWORD "gabagool"
+
+#define API_KEY "AIzaSyDM_2SgfLlHz7ghEMBv7xnqW6KxHi0RECs"
+
+#define DATABASE_URL "https://electronics3-4fcf1-default-rtdb.firebaseio.com/"
+
+//authorized user information
+#define USER_EMAIL "mohit19k9@gmail.com"
+#define USER_PASSWORD "mohito"
+
+// Define Firebase objects
+FirebaseData fbdo;
+FirebaseAuth auth;
+FirebaseConfig config;
+
+// Variable to save USER UID
+String uid;
+
+// Database main path (to be updated in setup with the user UID)
+String databasePath;
+// Database child nodes
+String precipPath = "/precipitation";
+String countPath = "/count";
+String tempPath = "/temperature";
+String humiPath = "/humidity";
+String timePath = "/timestamp";
+
+// Parent Node (to be updated in every loop)
+String parentPath;
+
+int timestamp;
+FirebaseJson json;
+
+const char* ntpServer = "pool.ntp.org";
+
+//send data every 10 seconds
+unsigned long sendDataPrevMillis = 0;
+unsigned long timerDelay = 10000;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Additional methods
+
+// Initialize WiFi
+void initWiFi() {
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to WiFi ..");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    delay(1000);
+  }
+  Serial.println(WiFi.localIP());
+  Serial.println();
+}
+
+//getting current time
+unsigned long getTime() {
+  time_t now;
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) {
+    //Serial.println("Failed to obtain time");
+    return (0);
+  }
+  time(&now);
+  return now;
+}
+
+float MeasureDistance(void) {
+  unsigned long
+    duration;
+
+  digitalWrite(trigPin_USS, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin_USS, LOW);
+
+  duration = pulseIn(echoPin_USS, HIGH);
+  return ((float)duration / 2.0) / 29.1;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -31,38 +127,70 @@ void setup() {
 
   pinMode(trigPin_USS, OUTPUT);
   pinMode(echoPin_USS, INPUT);
-
+  dht.begin();
   pinMode(rainPin, INPUT);
 
-  //Serial.println(" Serial Begins");
-  // Start the DS18B20 sensor
-  dht.begin();
+  initWiFi();
+  configTime(0, 0, ntpServer);
 
-  //uss_setup();
-  //precipitation_setup();
+  // Assign the api key (required)
+  config.api_key = API_KEY;
+
+  // Assign the user sign in credentials
+  auth.user.email = USER_EMAIL;
+  auth.user.password = USER_PASSWORD;
+
+  // Assign the RTDB URL (required)
+  config.database_url = DATABASE_URL;
+
+  Firebase.reconnectWiFi(true);
+  fbdo.setResponseSize(4096);
+
+  // Assign the callback function for the long running token generation task */
+  config.token_status_callback = tokenStatusCallback;  //see addons/TokenHelper.h
+
+  // Assign the maximum retry of token generation
+  config.max_token_generation_retry = 5;
+
+  // Initialize the library with the Firebase authen and config
+  Firebase.begin(&config, &auth);
+
+  // Getting the user UID might take a few seconds
+  Serial.println("Getting User UID");
+  while ((auth.token.uid) == "") {
+    Serial.print('.');
+    delay(1000);
+  }
+  // Print user UID
+  uid = auth.token.uid.c_str();
+  Serial.print("User UID: ");
+  Serial.println(uid);
+
+  // Update database path
+  databasePath = "/UsersData/" + uid + "/readings";
 }
 
 void loop() {
 
   uss_readings();
-  //if counter is whatever, then call these methods.
-  //Serial.print("counter value is at: ");
-  //Serial.println(counter_uss);
-  if (counter_uss % 10 == 0){
-    precipitation_readings();
+  if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
+    sendDataPrevMillis = millis();
+
+    //Get current timestamp
+    timestamp = getTime();
+    Serial.print("time: ");
+    Serial.println(timestamp);
+
+    parentPath = databasePath + "/" + String(timestamp);
+
     temp_readings();
+    precipitation_readings();
+
+    json.set(timePath, String(timestamp));
+    Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
   }
-
-}
-
-//SETUPS////////////////////////////////
-void uss_setup() {
-  pinMode(trigPin_USS, OUTPUT);
-  pinMode(echoPin_USS, INPUT);
-}
-
-void precipitation_setup() {
-  //precipitation se2nsor setup
+  json.set(timePath, String(timestamp));
+  Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
 }
 
 // sensor readings ////////////////////////////////////////////////////
@@ -81,8 +209,9 @@ void uss_readings() {
         //bump the count then move to the state where we wait for the sensor to show
         //clear again
         counter_uss++;
-        Serial.print(F("Count is: "));
-        Serial.println(counter_uss);
+        // Serial.print(F("Count is: "));
+        // Serial.println(counter_uss);
+        json.set(precipPath.c_str(), "Cars passed: "+String(counter_uss));
         state = WAIT_FOR_NO_VEHICLE;
 
       }  //if
@@ -108,15 +237,14 @@ void precipitation_readings() {
   int sensorValue = analogRead(rainPin);
   Serial.print(sensorValue);
   if (sensorValue == dryValue) {
-    Serial.println(" - Dry");
+    json.set(precipPath.c_str(), String(sensorValue) + " - It's dry");
   } else if (lightValue <= sensorValue < dryValue) {
-    Serial.println(" - Drizzling");
+    json.set(precipPath.c_str(), String(sensorValue) + " - Drizzling");
   } else if (heavyValue <= sensorValue < lightValue) {
-    Serial.println(" - Light Rain");
+    json.set(precipPath.c_str(), String(sensorValue) + " - Light precipitation");
   } else if (sensorValue < heavyValue) {
-    Serial.println(" - Heavy Rain");
+    json.set(precipPath.c_str(), String(sensorValue) + " - Heavy precipitation");
   }
-  delay(20);
 }
 void temp_readings() {
   float humi = dht.readHumidity();
@@ -127,19 +255,6 @@ void temp_readings() {
   Serial.print("Humidity: ");
   Serial.print(humi);
   Serial.println("%");
-  delay(20);
+  json.set(tempPath.c_str(), String(temp) + " degrees celcius");
+  json.set(humiPath.c_str(), "Humidity of " + String(humi) + " %");
 }
-
-//extra methods//////////////////////////////////////////////////////////////////////////////////////////
-float MeasureDistance(void) {
-  unsigned long
-    duration;
-
-  digitalWrite(trigPin_USS, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin_USS, LOW);
-
-  duration = pulseIn(echoPin_USS, HIGH);
-  return ((float)duration / 2.0) / 29.1;
-
-}  //MeasureDistance

@@ -142,7 +142,7 @@ void loop() {
     } else if (sensorValue < heavyValue) {
       json.set(precipPath.c_str(), "It's heavy wet");
     } else {
-      json.set(precipPath.c_str(), "It's dry");
+      json.set(precipPath.c_str(), String(sensorValue)+"It's dry");
     }
 
     json.set(timePath, String(timestamp));
