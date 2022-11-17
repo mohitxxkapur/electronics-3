@@ -173,9 +173,9 @@ void setup() {
 void loop() {
 
   uss_readings();
+  update_firebase();
   Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
 
-  update_firebase();
 }
 /////////////////////////////
 
@@ -195,7 +195,7 @@ void update_firebase() {
     precipitation_readings();
 
     json.set(timePath, String(timestamp));
-    Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
+    //Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
   }
 }
 
