@@ -173,6 +173,14 @@ void setup() {
 void loop() {
 
   uss_readings();
+  Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
+
+  update_firebase();
+}
+/////////////////////////////
+
+void update_firebase() {
+
   if (Firebase.ready() && (millis() - sendDataPrevMillis > timerDelay || sendDataPrevMillis == 0)) {
     sendDataPrevMillis = millis();
 
@@ -189,8 +197,6 @@ void loop() {
     json.set(timePath, String(timestamp));
     Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
   }
-  json.set(timePath, String(timestamp));
-  Serial.printf("Set json... %s\n", Firebase.RTDB.setJSON(&fbdo, parentPath.c_str(), &json) ? "ok" : fbdo.errorReason().c_str());
 }
 
 // sensor readings ////////////////////////////////////////////////////
@@ -211,7 +217,7 @@ void uss_readings() {
         counter_uss++;
         // Serial.print(F("Count is: "));
         // Serial.println(counter_uss);
-        json.set(countPath.c_str(), "Cars passed: "+String(counter_uss));
+        json.set(countPath.c_str(), "Cars passed: " + String(counter_uss));
         state = WAIT_FOR_NO_VEHICLE;
 
       }  //if
