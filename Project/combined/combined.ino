@@ -123,10 +123,10 @@ void temp_readings() {
   float temp = dht.readTemperature();
   Serial.print("Temperature: ");
   Serial.print(temp);
-  Serial.print(" C ");
-  Serial.println("Humidity: ");
+  Serial.print(" degrees C. ");
+  Serial.print("Humidity: ");
   Serial.print(humi);
-  Serial.print("%");
+  Serial.println("%");
   delay(20);
 }
 

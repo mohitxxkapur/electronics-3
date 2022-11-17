@@ -1,6 +1,5 @@
 #include "DHT.h"
 #define DHT11PIN 16
-DONKEYDDDDD
 
 
 DHT dht(DHT11PIN, DHT11);

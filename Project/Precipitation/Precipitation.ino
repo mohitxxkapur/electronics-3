@@ -1,6 +1,4 @@
-
 int rainPin = 36;
-// you can adjust the threshold value
 int dryValue = 4095;
 int lightValue = 3250;
 int heavyValue = 1000;
