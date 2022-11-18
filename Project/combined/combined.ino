@@ -40,8 +40,8 @@ DHT dht(DHT11PIN, DHT11);
 #include "addons/RTDBHelper.h"
 
 // Various credentials
-#define WIFI_SSID "Sauga Strawhats"
-#define WIFI_PASSWORD "gabagool"
+#define WIFI_SSID "send cursed photos"
+#define WIFI_PASSWORD "omartijari"
 
 #define API_KEY "AIzaSyDM_2SgfLlHz7ghEMBv7xnqW6KxHi0RECs"
 
@@ -167,7 +167,7 @@ void setup() {
   Serial.println(uid);
 
   // Update database path
-  databasePath = "/UsersData/" + uid + "/readings";
+  databasePath = "/UsersData/" + uid + "/readings"; //make this an empty string 
   parentPath = databasePath;  //+ "/" + String(timestamp);
 }
 
