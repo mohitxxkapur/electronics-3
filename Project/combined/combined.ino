@@ -168,7 +168,7 @@ void setup() {
 
   // Update database path
   databasePath = "/UsersData/" + uid + "/readings";
-  parentPath = databasePath; //+ "/" + String(timestamp);
+  parentPath = databasePath;  //+ "/" + String(timestamp);
 }
 
 void loop() {
@@ -217,7 +217,8 @@ void uss_readings() {
         counter_uss++;
         // Serial.print(F("Count is: "));
         // Serial.println(counter_uss);
-        json.set(countPath.c_str(), "Cars passed: " + String(counter_uss));
+        //json.set(countPath.c_str(), "Cars passed: " + String(counter_uss));
+        json.set(countPath.c_str(), String(counter_uss));
         state = WAIT_FOR_NO_VEHICLE;
 
       }  //if
@@ -261,6 +262,8 @@ void temp_readings() {
   Serial.print("Humidity: ");
   Serial.print(humi);
   Serial.println("%");
+  //json.set(tempPath.c_str(), String(temp) + " degrees celcius");
+  //json.set(humiPath.c_str(), "Humidity of " + String(humi) + " %");
   json.set(tempPath.c_str(), String(temp) + " degrees celcius");
-  json.set(humiPath.c_str(), "Humidity of " + String(humi) + " %");
+  json.set(humiPath.c_str(), String(humi) + " %");
 }
