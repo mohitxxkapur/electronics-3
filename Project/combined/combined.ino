@@ -40,8 +40,8 @@ DHT dht(DHT11PIN, DHT11);
 #include "addons/RTDBHelper.h"
 
 // Various credentials
-#define WIFI_SSID "send cursed photos"
-#define WIFI_PASSWORD "omartijari"
+#define WIFI_SSID "Sauga Strawhats"
+#define WIFI_PASSWORD "gabagool"
 
 #define API_KEY "AIzaSyDM_2SgfLlHz7ghEMBv7xnqW6KxHi0RECs"
 
@@ -211,7 +211,7 @@ void uss_readings() {
       //get the distance...
       dist = MeasureDistance();
       //...if it's less than 30cm and greater than zero (pulseIn returns 0 if no pulse seen...)...
-      if (dist <= 30.0 && dist > 0.0) {
+      if (dist <= 300.0 && dist > 0.0) {
         //bump the count then move to the state where we wait for the sensor to show
         //clear again
         counter_uss++;
@@ -230,7 +230,7 @@ void uss_readings() {
       //I used 0.01 instead of "==0.0" in case the math returns a float that's tiny but not
       //_equal_ to zero.
       dist = MeasureDistance();
-      if (dist > 40.0 || dist <= 0.01)
+      if (dist > 300.0 || dist <= 0.01)
         //when condition met, go back to waiting for vehicle again
         state = WAIT_FOR_VEHICLE;
 
